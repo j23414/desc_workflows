@@ -140,6 +140,12 @@ nextflow run tutorial.nf
 #> HELLO
 ```
 
+It might be a little confusing on how to read this script. Read from **bottom up**, I've annotated arrows for how my eyes move across the script.
+
+<img src="imgs/eye_movement.png" />
+
+Processes are executed up the dependency becaues `results` must be created for the output.
+
 </details>
 
 **TODO:**
