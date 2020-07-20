@@ -24,6 +24,8 @@ rule:
 
 ## NextFlow
 
+Each item below can be expanded, to see details
+
 <details><summary>Install Nextflow on MacOS - <b>DONE</b></summary>
 
 Based on [installation instructions on Nextflow](https://www.nextflow.io/), make sure Java version > 1.8
