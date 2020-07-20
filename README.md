@@ -4,7 +4,7 @@
 
 **Purpose:** Describe workflow tools in terms of Makefiles, Snakemake, and Nextflow
 
-Probably the earliest workflow tool is Makefiles for compiling large c++ projects. Because compilation can be long and tedious, it was important to keep track of which files had been compiled and needed to be recompiled. [The c++ compilation dependency graphs were put into a Makefile](https://www.tutorialspoint.com/makefile/makefile_dependencies.htm) and listed as rules.
+Probably the earliest workflow tool is Makefiles for compiling large c++ projects. Because compilation can be long and tedious, it was important to keep track of which files had been compiled and needed to be recompiled. [The c++ compilation dependency graphs were put into a Makefile](https://www.tutorialspoint.com/makefile/makefile_dependencies.htm) and listed as rules. In case you're curious, here's a [nice tutorial on makefiles](https://makefiletutorial.com/).
 
 ```
 rule:
