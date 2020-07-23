@@ -1,6 +1,6 @@
 # Workflow tools
 
-**Last Update:** 2020/07/15
+**Last Update:** 2020/07/23
 
 **Purpose:** Describe workflow tools in terms of Makefiles, Snakemake, and Nextflow
 
@@ -156,7 +156,7 @@ Regardless, I'll need a better understanding of what `results.view {it.trim()}` 
 
 > For Nextflow language basics, recommend starting at this [sphinx-generated documentation](https://www.nextflow.io/docs/latest/script.html#script-page)...notice that the language seems to wrap bash scripts in java functions. Honest reaction so far is that nextflow commands seem to be aimed at java programmers. Despite the shebang `#! /usr/bin/env` which usually indicates bash/python/other scripting-style languages, the function names (example: `println` instead of bash's `echo`) are from java. Nextflow feels like trying to "speak bash with a java accent". Not saying it's bad, but still exploring features on if the java-accent is worth it.
 
-<details><summary>Nextflow basics - data structures</summary>
+<details><summary>Nextflow basics: data structures - <b>DONE</b> </summary>
 
 Let's start with a hello world... this thing needs to print, putting it into a process without generating a print statement/file doesn't prove it runs or even makes sense.
 
@@ -279,6 +279,128 @@ nextflow run script03.nf
 
 </details>
 
+<details><summary>Nextflow execute bash/R/Python scripts via process - <b>DONE</b></summary>
+
+A bash command is saved as a string and then `execute`-ed in **script04.nf**
+
+```
+#! /usr/bin/env nextflow
+
+/*************************************
+ Execute a bash command in Nextflow
+ *************************************/
+
+/* use """ to do multi-line bash commands */
+cmd_str =
+  """
+  echo "Hello world"
+  """
+
+result = cmd_str.execute().text
+println result
+
+/*************************************
+ Link the program by full path
+ A string executed can only have 1 bash command
+ *************************************/
+
+echo_program="/bin/echo"       /* full path of program */
+cmd_str =
+  """
+  ${echo_program} "Hello again";
+  echo "what is happening, why print echo" "\n"
+  /* threw an error on bash comments, so can't even use bash comments in a bash block */
+  /* so cmd strings cannot do multiline bash... weird */
+  """
+result = cmd_str.execute().text
+println result
+```
+
+However notice how the string can only have one command as it prints out the next `echo` in the **bash** output, instead of executing it. 
+
+```
+nextflow run script04.nf
+#> N E X T F L O W  ~  version 20.04.1
+#> Launching `script04.nf` [romantic_jones] - revision: 4536b402c2
+#> "Hello world"
+#> 
+#> "Hello again"; echo "what is happening, why print echo" " " /* threw an error on bash comments, so can't even use bash comments in a bash block */ /* so cmd strings cannot do multiline bash... weird */
+```
+
+This is fixed in the process structures, where multi line commands seem to work.
+
+Still called **script04.nf** but using process structures.
+
+```
+#! /usr/bin/env nextflow
+/*************************************
+ Let's see if a process can have multi-line commands
+ *************************************/
+
+process myprocess1 {
+
+  script:
+  """
+  #! /usr/bin/env bash
+  echo "Process1 says hello"
+  echo "Still in Process1"    
+  """
+}
+
+println "Notice how above has no output"
+
+process myprocess2 {
+  output:
+  stdout result2
+
+  script:
+  """
+  #! /usr/bin/env bash
+  echo "Process2 says hello"
+  echo "Still in Process 2"   # Okay multi-line and bash-style comments work in processes
+  """
+}
+
+println result2.view { it.trim() }  /* I guess this convention has to be memorized... I don't see a nice explanation yet */
+
+/*************************************
+ Processes can have python, R, other scripting languages
+ *************************************/
+process myprocess3 {
+  output:
+  stdout result3
+
+  script:
+  """
+  #! /usr/bin/env Rscript
+  cat("Rscript says Hello world\n")
+  x=c(1:5)
+  cat(x)
+  """
+}
+
+println result3.view { it.trim() }
+```
+
+Process 1 doesn't have an output specified, so prints nothing. Process 2 is connected to output `result2`. Process 3 is a bunch of R commands, basically need the shebang to specify the language.
+
+```
+nextflow run script04.nf
+#> Notice how above has no output
+#> DataflowVariable(value=null)
+#> DataflowVariable(value=null)
+#> executor >  local (3)
+#> [d0/e1cf69] process > myprocess1 [100%] 1 of 1 ✔
+#> [58/f7a9bb] process > myprocess2 [100%] 1 of 1 ✔
+#> [4b/847e83] process > myprocess3 [100%] 1 of 1 ✔
+#> Process2 says hello
+#> Still in Process 2
+#> Rscript says Hello world
+#> 1 2 3 4 5
+```
+
+</details>
+
 <details><summary>Nextflow control structures - functions, closures, processes</summary>
 
 ... in progress
@@ -311,5 +433,28 @@ nextflow run script02.nf
 ```
 
 Instead use java-style comments (`/* this is a java-style comment */`).
+
+</details>
+
+<details><summary>Convert data to a string type</summary>
+
+Especially when you are printing a datatype, may need to convert to string. Showing an example error msg for printing a boolean with a string (`x = false; println x + "\t this is a bool"`)
+
+```
+nextflow run script04.nf
+N E X T F L O W  ~  version 20.04.1
+Launching `script04.nf` [modest_ptolemy] - revision: d9c9745850
+Unknown method `plus` on Boolean type
+
+ -- Check script 'script04.nf' at line: 4 or see '.nextflow.log' file for more details
+
+```
+
+Usually can fix this by using java's `String.valueOf()` function:
+
+```
+x = false
+println String.valueOf(x) + "\t this is a bool"
+```
 
 </details>
