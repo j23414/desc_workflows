@@ -401,6 +401,133 @@ nextflow run script04.nf
 
 </details>
 
+<details><summary>Minimal example of a chain of processes - <b>DONE and neat : )</b></summary>
+
+Instead of worrying about installing a long running program, we'll simulate it using the `sleep 5` command (wait 5 seconds).
+
+```
+#! /usr/bin/env nextflow
+
+/**********************************
+ Create a chain of long running processes
+ This basically simulates trinity/canu/whatever pipeline
+ **********************************/
+
+
+println "\nPipeline = Amy -> Bob -> Cathy -> Dave -> Eve"
+println " where each person runs 5 seconds to pass the baton to next person\n"
+
+process Amy {
+  output: stdout Amy_out
+
+  script:
+  """
+  #! /usr/bin/env bash
+  sleep 5                    # <= pause for a few seconds
+  echo "Amy passes baton"
+  """
+}
+
+process Bob {
+  input: val baton_in from Amy_out
+    
+  output: stdout Bob_out
+  
+  script:
+  """
+  #! /usr/bin/env bash
+  sleep 5                    # <= pause for a few seconds
+  echo "$baton_in; Bob passes baton"
+  """
+}
+
+process Cathy {
+  input: val baton_in from Bob_out
+    
+  output: stdout Cathy_out
+
+  script:
+  """
+  #! /usr/bin/env bash
+  sleep 5                    # <= pause for a few seconds
+  echo "$baton_in; Cathy passes baton"
+  """
+}
+
+process Dave {
+  input: val baton_in from Cathy_out
+    
+  output: stdout Dave_out
+
+script:
+  """
+  #! /usr/bin/env bash
+  sleep 5                    # <= pause for a few seconds
+  echo "$baton_in; Dave passes baton"
+  """
+}
+
+process Eve {
+  input: val baton_in from Dave_out
+    
+  output: stdout Eve_out
+
+script:
+  """
+  #! /usr/bin/env bash
+  sleep 5                    # <= pause for a few seconds
+  echo "$baton_in; Eve passes baton"
+  """
+}
+
+/* print final concatinated string */
+println Eve_out.view { it.trim() }
+```
+
+Which looks nice in bash... as it prints progress
+
+```
+N E X T F L O W  ~  version 20.04.1
+Launching `code/script06.nf` [crazy_mclean] - revision: c6a509673f
+
+Pipeline = Amy -> Bob -> Cathy -> Dave -> Eve
+ where each person runs 5 seconds to pass the baton to next person
+
+DataflowVariable(value=null)
+executor >  local (2)
+[ee/41b22c] process > Amy   [100%] 1 of 1 ✔
+[cf/db02ae] process > Bob   [  0%] 0 of 1
+[-        ] process > Cathy -
+[-        ] process > Dave  -
+[-        ] process > Eve   -
+```
+
+Eventually looks like the following when finished:
+
+```
+nextflow run code/script06.nf
+N E X T F L O W  ~  version 20.04.1
+Launching `code/script06.nf` [crazy_mclean] - revision: c6a509673f
+
+Pipeline = Amy -> Bob -> Cathy -> Dave -> Eve
+ where each person runs 5 seconds to pass the baton to next person
+
+DataflowVariable(value=null)
+executor >  local (5)
+[ee/41b22c] process > Amy   [100%] 1 of 1 ✔
+[cf/db02ae] process > Bob   [100%] 1 of 1 ✔
+[b0/cccd94] process > Cathy [100%] 1 of 1 ✔
+[9f/a652c6] process > Dave  [100%] 1 of 1 ✔
+[ca/39a72a] process > Eve   [100%] 1 of 1 ✔
+Amy passes baton
+; Bob passes baton
+; Cathy passes baton
+; Dave passes baton
+; Eve passes baton
+```
+
+</details>
+
 <details><summary>Nextflow control structures - functions, closures, processes</summary>
 
 ... in progress
