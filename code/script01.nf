@@ -1,7 +1,7 @@
 #! /usr/bin/env nextflow
 
-/* uses Java style comments, which makes sense since this depends on Java 1.8 */
+/* Java-style comments */
 
-println "Hello world!" /* println is a java function... getting the impression nextflow is bash wrapped in java... yay turducken */
+println "Hello world!"       /* println() is literally a Java function, not a function in bash */
 
 

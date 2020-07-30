@@ -10,8 +10,7 @@ println "\nPipeline = Amy -> Bob -> Cathy -> Dave -> Eve"
 println " where each person runs 5 seconds to pass the baton to next person\n"
 
 process Amy {
-  output:
-    stdout Amy_out
+  output: stdout Amy_out
 
   script:
   """
@@ -22,13 +21,11 @@ process Amy {
 }
 
 process Bob {
-  input:
-    val baton_in from Amy_out
+  input: val baton_in from Amy_out
     
-  output:
-    stdout Bob_out
+  output: stdout Bob_out
 
-script:
+  script:
   """
   #! /usr/bin/env bash
   sleep 5                    # <= pause for a few seconds
@@ -37,13 +34,11 @@ script:
 }
 
 process Cathy {
-  input:
-    val baton_in from Bob_out
+  input: val baton_in from Bob_out
     
-  output:
-    stdout Cathy_out
+  output: stdout Cathy_out
 
-script:
+  script:
   """
   #! /usr/bin/env bash
   sleep 5                    # <= pause for a few seconds
@@ -52,13 +47,11 @@ script:
 }
 
 process Dave {
-  input:
-    val baton_in from Cathy_out
+  input: val baton_in from Cathy_out
     
-  output:
-    stdout Dave_out
+  output: stdout Dave_out
 
-script:
+  script:
   """
   #! /usr/bin/env bash
   sleep 5                    # <= pause for a few seconds
@@ -67,13 +60,11 @@ script:
 }
 
 process Eve {
-  input:
-    val baton_in from Dave_out
+  input: val baton_in from Dave_out
     
-  output:
-    stdout Eve_out
+  output: stdout Eve_out
 
-script:
+  script:
   """
   #! /usr/bin/env bash
   sleep 5                    # <= pause for a few seconds

@@ -1,0 +1,60 @@
+nextflow run nf-core/rnaseq -profile test,docker
+
+#> N E X T F L O W  ~  version 20.07.1
+#> Launching `nf-core/rnaseq` [romantic_ekeblad] - revision: 3b6df9bd10 [master]
+#> Both GTF and GFF have been provided: Using GTF as priority.
+#> ----------------------------------------------------
+#>                                         ,--./,-.
+#>         ___     __   __   __   ___     /,-._.--~'
+#>   |\ | |__  __ /  ` /  \ |__) |__         }  {
+#>   | \| |       \__, \__/ |  \ |___     \`-._,-`-,
+#>                                         `._,._,'
+#>   nf-core/rnaseq v1.4.2
+#> ----------------------------------------------------
+#> Pipeline Release  : master
+#> Run Name          : romantic_ekeblad
+#> Reads             : data/*{1,2}.fastq.gz
+#> Data Type         : Single-End
+#> Strandedness      : None
+#> Trimming          : 5'R1: 0 / 5'R2: 0 / 3'R1: 0 / 3'R2: 0 / NextSeq Trim: 0
+#> Aligner           : STAR
+#> Fasta Ref         : https://github.com/nf-core/test-datasets/raw/rnaseq/reference/genome.fa
+#> GTF Annotation    : https://github.com/nf-core/test-datasets/raw/rnaseq/reference/genes.gtf
+#> GFF3 Annotation   : https://github.com/nf-core/test-datasets/raw/rnaseq/reference/genes.gff
+#> Remove Ribosomal RNA: false
+#> Biotype GTF field : gene_biotype
+#> Save prefs        : Ref Genome: No / Trimmed FastQ: No / Alignment intermediates: No
+#> Max Resources     : 6 GB memory, 2 cpus, 2d time per job
+#> Container         : docker - nfcore/rnaseq:1.4.2
+#> Output dir        : ./results
+#> Launch dir        : /Users/jenchang/Desktop/nextflow/rnaseq
+#> Working dir       : /Users/jenchang/Desktop/nextflow/rnaseq/work
+#> Script dir        : /Users/jenchang/.nextflow/assets/nf-core/rnaseq
+#> User              : jenchang
+#> Config Profile    : test,docker
+#> Config Description: Minimal test dataset to check pipeline function
+#> ----------------------------------------------------
+#> executor >  local (2)
+#> [c0/8019a5] process > get_software_versions                                                            [100%] 1 of 1 ✔
+#> [8b/cc096d] process > makeBED12 (genes.gtf)                                                            [100%] 1 of 1, cached: 1 ✔
+#> [60/7887a7] process > makeSTARindex (genome.fa)                                                        [100%] 1 of 1, cached: 1 ✔
+#> [87/f6d048] process > fastqc (SRR4238379)                                                              [100%] 4 of 4, cached: 4 ✔
+#> [d0/3e2134] process > trim_galore (SRR4238379)                                                         [100%] 4 of 4, cached: 4 ✔
+#> [73/7e1877] process > star (SRR4238351)                                                                [100%] 4 of 4, cached: 4 ✔
+#> [11/345d31] process > rseqc (SRR4238359_subsampAlignedByCoord.out)                                     [100%] 4 of 4, cached: 4 ✔
+#> [a7/86a5f3] process > preseq (SRR4238355_subsampAlignedByCoord.out)                                    [100%] 4 of 4, cached: 4 ✔
+#> [00/fb14d4] process > markDuplicates (SRR4238355_subsampAlignedByCoord.out)                            [100%] 4 of 4, cached: 4 ✔
+#> [4b/46f0d1] process > qualimap (SRR4238355_subsampAligned.sortedByCoord.out)                           [100%] 4 of 4, cached: 4 ✔
+#> [d7/c9cf11] process > dupradar (SRR4238359_subsampAligned.sortedByCoord.out.markDups)                  [100%] 4 of 4, cached: 4 ✔
+#> [4d/a7d8d3] process > featureCounts (SRR4238355_subsampAlignedByCoord.out)                             [100%] 4 of 4, cached: 4 ✔
+#> [83/d7dfa8] process > merge_featureCounts (SRR4238351_subsampAlignedByCoord.out_gene.featureCounts)    [100%] 1 of 1, cached: 1 ✔
+#> [2f/48c37b] process > stringtieFPKM (SRR4238355_subsampAlignedByCoord.out)                             [100%] 4 of 4, cached: 4 ✔
+#> [4c/f714fc] process > sample_correlation (SRR4238351_subsamp.sortedByCoord.out_gene.featureCounts.txt) [100%] 1 of 1, cached: 1 ✔
+#> [81/d24248] process > multiqc                                                                          [100%] 1 of 1 ✔
+#> [13/233996] process > output_documentation                                                             [100%] 1 of 1, cached: 1 ✔
+#> [0;35m[nf-core/rnaseq] Pipeline completed successfully
+#> Completed at: 29-Jul-2020 18:45:46
+#> Duration    : 1m 28s
+#> CPU hours   : 0.3 (87.9% cached)
+#> Succeeded   : 2
+#> Cached      : 45

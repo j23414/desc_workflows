@@ -1,0 +1,16 @@
+ls -ltr results/
+
+#> total 0
+#> drwxr-xr-x   7 jenchang  staff   224B Jul 29 17:13 fastqc
+#> drwxr-xr-x   5 jenchang  staff   160B Jul 29 17:14 trim_galore
+#> drwxr-xr-x   3 jenchang  staff    96B Jul 29 17:14 STAR
+#> drwxr-xr-x  11 jenchang  staff   352B Jul 29 17:16 markDuplicates
+#> drwxr-xr-x   6 jenchang  staff   192B Jul 29 17:16 preseq
+#> drwxr-xr-x  13 jenchang  staff   416B Jul 29 17:16 rseqc
+#> drwxr-xr-x   9 jenchang  staff   288B Jul 29 17:17 stringtieFPKM
+#> drwxr-xr-x   6 jenchang  staff   192B Jul 29 17:17 qualimap
+#> drwxr-xr-x   8 jenchang  staff   256B Jul 29 17:17 sample_correlation
+#> drwxr-xr-x  15 jenchang  staff   480B Jul 29 17:17 dupradar
+#> drwxr-xr-x   6 jenchang  staff   192B Jul 29 17:17 featureCounts
+#> drwxr-xr-x   5 jenchang  staff   160B Jul 29 18:45 MultiQC
+#> drwxr-xr-x  14 jenchang  staff   448B Jul 29 18:45 pipeline_info
