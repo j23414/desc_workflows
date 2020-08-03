@@ -7,7 +7,7 @@
 process demo_fasta {
   publishDir "${params.outdir}", mode: 'copy'
   
-  output: file 'demo.fasta'
+  output: path 'demo.fasta'
   
   script:
   """
@@ -20,16 +20,32 @@ process demo_fasta {
   """
 }
 
-// /* In progress... */
-// process makeblastdb {
-// 
+/***********************************
+ Create a blastn database
+ ***********************************/
+
+process makeblastdb {
+  publishDir "${params.outdir}", mode: 'copy'
+
+  input: path x_fasta
+  output: file "${x_fasta}*"
+  
+  script:
+  """
+  makeblastdb -in ${x_fasta} -dbtype nucl -out ${x_fasta}
+  """
+}
+
+/***********************************
+ Blastn a query against the database (do this in parallel?)
+ ***********************************/
+// /** in progress **/
+// process blastn {
 //   publishDir "${params.outdir}", mode: 'copy'
-// 
-//   input: val fasta from $params.fasta
-//   output: file '${params.fasta}*'
-//   
+//   input: path query_fasta
+//   output: file "blast_output.txt"
 //   script:
 //   """
-//   makeblastdb -in ${fasta} -dbtype nucl
+//   blastn -db ${somedb} -query ${query_fasta} -outfmt 6 -out blast_output.txt
 //   """
 // }

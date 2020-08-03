@@ -739,7 +739,7 @@ need a `publishDir` in the process.
     process demo_fasta {
       publishDir "${params.outdir}", mode: 'copy'
       
-      output: file 'demo.fasta'
+      output: path 'demo.fasta'
       
       script:
       """
@@ -752,17 +752,33 @@ need a `publishDir` in the process.
       """
     }
 
-    // /* In progress... */
-    // process makeblastdb {
-    // 
+    /***********************************
+     Create a blastn database
+     ***********************************/
+
+    process makeblastdb {
+      publishDir "${params.outdir}", mode: 'copy'
+
+      input: path x_fasta
+      output: file "${x_fasta}*"
+      
+      script:
+      """
+      makeblastdb -in ${x_fasta} -dbtype nucl -out ${x_fasta}
+      """
+    }
+
+    /***********************************
+     Blastn a query against the database (do this in parallel?)
+     ***********************************/
+    // /** in progress **/
+    // process blastn {
     //   publishDir "${params.outdir}", mode: 'copy'
-    // 
-    //   input: val fasta from $params.fasta
-    //   output: file '${params.fasta}*'
-    //   
+    //   input: path query_fasta
+    //   output: file "blast_output.txt"
     //   script:
     //   """
-    //   makeblastdb -in ${fasta} -dbtype nucl
+    //   blastn -db ${somedb} -query ${query_fasta} -outfmt 6 -out blast_output.txt
     //   """
     // }
 
@@ -776,28 +792,42 @@ And include that process in a different nextflow script
     /********* Modules *********/
     nextflow.enable.dsl=2
     include { demo_fasta } from './mod_process07.nf'
-    // include { makeblastdb } from './mod_process07.nf'
+    include { makeblastdb } from './mod_process07.nf'
 
     /********* Main *********/
+
+    /* Version 1: pass output to next process */
     workflow {
-    //  data = channel.fromPath('./*.nf')
+    //  data = channel.fromPath('./${params.outdir}/demo.fasta')
       demo_fasta()
-    //  makeblastdb()
+      makeblastdb(demo_fasta.out)
     }
-    println "output in ${params.outdir}"
+
+    // /* Version 2: Pipe output to next process */
+    // workflow {
+    // //  data = channel.fromPath('./${params.outdir}/demo.fasta')
+    //   demo_fasta | makeblastdb
+    // }
 
 Running the script results in…
 
     nextflow run script07.nf --outdir output_dir
     #> N E X T F L O W  ~  version 20.07.1
-    #> Launching `script07.nf` [gigantic_gates] - revision: c5348f8e22
-    #> output in output_dir
-    #> executor >  local (1)
-    #> [7d/6e1945] process > demo_fasta [100%] 1 of 1 ✔
+    #> Launching `script07.nf` [thirsty_dalembert] - revision: 997b0d2610
+    #> executor >  local (2)
+    #> [64/a3898f] process > demo_fasta  [100%] 1 of 1 ✔
+    #> [27/bd30d1] process > makeblastdb [100%] 1 of 1 ✔
 
     ls -ltr output_dir/
-    #> total 8
-    #> -rw-r--r--  1 jenchang  staff    72B Jul 30 17:13 demo.fasta
+    #> total 120
+    #> -rw-r--r--  1 jenchang  staff    72B Aug  3 13:11 demo.fasta
+    #> -rw-r--r--  1 jenchang  staff    20K Aug  3 13:11 demo.fasta.ndb
+    #> -rw-r--r--  1 jenchang  staff    13B Aug  3 13:11 demo.fasta.nsq
+    #> -rw-r--r--  1 jenchang  staff   146B Aug  3 13:11 demo.fasta.nhr
+    #> -rw-r--r--  1 jenchang  staff    12B Aug  3 13:11 demo.fasta.nto
+    #> -rw-r--r--  1 jenchang  staff   124B Aug  3 13:11 demo.fasta.nin
+    #> -rw-r--r--  1 jenchang  staff    32B Aug  3 13:11 demo.fasta.not
+    #> -rw-r--r--  1 jenchang  staff    16K Aug  3 13:11 demo.fasta.ntf
 
     cat output_dir/demo.fasta
     #> >Sequence_A

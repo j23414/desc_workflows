@@ -6,12 +6,21 @@ params.outdir = "output_dir"
 /********* Modules *********/
 nextflow.enable.dsl=2
 include { demo_fasta } from './mod_process07.nf'
-// include { makeblastdb } from './mod_process07.nf'
+include { makeblastdb } from './mod_process07.nf'
 
 /********* Main *********/
+
+/* Version 1: pass output to next process */
 workflow {
-//  data = channel.fromPath('./*.nf')
+//  data = channel.fromPath('./${params.outdir}/demo.fasta')
   demo_fasta()
-//  makeblastdb()
+  makeblastdb(demo_fasta.out)
 }
-println "output in ${params.outdir}"
+
+// /* Version 2: Pipe output to next process */
+// workflow {
+// //  data = channel.fromPath('./${params.outdir}/demo.fasta')
+//   demo_fasta | makeblastdb
+// }
+
+
