@@ -1,12 +1,12 @@
 NextFlow
 ================
-jenchang
-7/29/2020
+Jennifer Chang
+7/23/2020
 
 Workflow tools
 ==============
 
-**Last Update:** 2020/07/23
+**Last Update:** 2020/08/03
 
 **Purpose:** Describe workflow tools in terms of Makefiles, Snakemake,
 and Nextflow
@@ -96,6 +96,24 @@ Install a local copy of nextflow
 
 The executable `nextflow` can be called locally or moved to the
 `/usr/local/bin/` folder to be called from anywhere.
+
+</details>
+<details>
+<summary>
+Install Nextflow on Ceres HPCC - <b>worked when I tried it</b>
+</summary>
+
+After logging onto Ceres, load the java module and run the nextflow
+install script
+
+    module load java
+    java -version 
+
+    # Install Nextflow in current folder
+    curl -s https://get.nextflow.io | bash
+
+    # Test the nextflow install by running it
+    ./nextflow run hello
 
 </details>
 <details>
@@ -664,6 +682,9 @@ more details of pipeline
 
 <img src="imgs/nf_core_rnaseq.png" />
 <img src="imgs/nf_core_rnaseq_executionreport.png" />
+<img src="imgs/nf_core_rna_executiontime.png" />
+
+<!--<img src="imgs/nf_core_rnaseq_executiontime.png" />-->
 
 Okay, I admit that the html reports are nice. Looking at the source
 code, the whole pipeline is defined in
@@ -699,6 +720,90 @@ Notice the `publishDir "${params.outdir}/fastqc` declaration, the
 is how we get a `results` directory. Each step of the pipeline can have
 its own process and could organize the output similar to
 `results/program_name`.
+
+</details>
+<details>
+<summary>
+modules and writing files - <b>in progress</b>
+</summary>
+
+Let’s create a process that creates an example fasta file. Notice how we
+need a `publishDir` in the process.
+
+    #! /usr/bin/env nextflow
+
+    /***********************************
+     Create an example demo fasta file
+     ***********************************/
+
+    process demo_fasta {
+      publishDir "${params.outdir}", mode: 'copy'
+      
+      output: file 'demo.fasta'
+      
+      script:
+      """
+      cat << '_EOF' > demo.fasta
+      >Sequence_A
+      AAAAAAAAAAAAAAAAAAAAAAA
+      >Sequence_C
+      CCCCCCCCCCCCCCCCCCCCCCC
+      _EOF
+      """
+    }
+
+    // /* In progress... */
+    // process makeblastdb {
+    // 
+    //   publishDir "${params.outdir}", mode: 'copy'
+    // 
+    //   input: val fasta from $params.fasta
+    //   output: file '${params.fasta}*'
+    //   
+    //   script:
+    //   """
+    //   makeblastdb -in ${fasta} -dbtype nucl
+    //   """
+    // }
+
+And include that process in a different nextflow script
+
+    #! /usr/bin/env nextflow
+
+    /********* Params **********/
+    params.outdir = "output_dir"
+
+    /********* Modules *********/
+    nextflow.enable.dsl=2
+    include { demo_fasta } from './mod_process07.nf'
+    // include { makeblastdb } from './mod_process07.nf'
+
+    /********* Main *********/
+    workflow {
+    //  data = channel.fromPath('./*.nf')
+      demo_fasta()
+    //  makeblastdb()
+    }
+    println "output in ${params.outdir}"
+
+Running the script results in…
+
+    nextflow run script07.nf --outdir output_dir
+    #> N E X T F L O W  ~  version 20.07.1
+    #> Launching `script07.nf` [gigantic_gates] - revision: c5348f8e22
+    #> output in output_dir
+    #> executor >  local (1)
+    #> [7d/6e1945] process > demo_fasta [100%] 1 of 1 ✔
+
+    ls -ltr output_dir/
+    #> total 8
+    #> -rw-r--r--  1 jenchang  staff    72B Jul 30 17:13 demo.fasta
+
+    cat output_dir/demo.fasta
+    #> >Sequence_A
+    #> AAAAAAAAAAAAAAAAAAAAAAA
+    #> >Sequence_C
+    #> CCCCCCCCCCCCCCCCCCCCCCC
 
 </details>
 
