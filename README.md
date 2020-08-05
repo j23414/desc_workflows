@@ -562,7 +562,7 @@ Which looks nice in bash… as it prints progress
 
 Eventually looks like the following when finished:
 
-    nextflow run code/script06.nf
+    nextflow run script06.nf
     N E X T F L O W  ~  version 20.04.1
     Launching `code/script06.nf` [crazy_mclean] - revision: c6a509673f
 
@@ -581,6 +581,14 @@ Eventually looks like the following when finished:
     ; Cathy passes baton
     ; Dave passes baton
     ; Eve passes baton
+
+And if you run it with the html reports turned on:
+
+    nextflow run script06.nf -with-timeline timeline.html
+
+It will also generate a plot:
+
+<img src="imgs/timeline.png" />
 
 </details>
 <details>
@@ -684,8 +692,6 @@ more details of pipeline
 <img src="imgs/nf_core_rnaseq_executionreport.png" />
 <img src="imgs/nf_core_rna_executiontime.png" />
 
-<!--<img src="imgs/nf_core_rnaseq_executiontime.png" />-->
-
 Okay, I admit that the html reports are nice. Looking at the source
 code, the whole pipeline is defined in
 [main.nf](https://github.com/nf-core/rnaseq/blob/master/main.nf)… if we
@@ -724,7 +730,7 @@ its own process and could organize the output similar to
 </details>
 <details>
 <summary>
-modules and writing files - <b>in progress</b>
+modules and writing files - <b>DONE</b>
 </summary>
 
 Let’s create a process that creates an example fasta file. Notice how we
@@ -834,6 +840,137 @@ Running the script results in…
     #> AAAAAAAAAAAAAAAAAAAAAAA
     #> >Sequence_C
     #> CCCCCCCCCCCCCCCCCCCCCCC
+
+</details>
+<details>
+<summary>
+Pass parameters, or arguments to script - <b>DONE</b>
+</summary>
+
+You can pass parameters to a nextflow script
+
+    #! /usr/bin/env nextflow
+
+    // Give default values
+    params.input = 'default.txt'
+    params.outdir = 'results'
+
+    // Use the parameters in a print statement
+    println "params.input = $params.input"
+    println "params.output = $params.outdir"
+
+Running the script in three different ways below. Notice how parameters
+`--input` can be changed.
+
+    nextflow run script08.nf
+    #> N E X T F L O W  ~  version 20.07.1
+    #> Launching `script08.nf` [pedantic_sinoussi] - revision: fee10780ef
+    #> params.input = default.txt
+    #> params.output = ./results
+
+    nextflow run script08.nf --input "something.txt"
+    #> N E X T F L O W  ~  version 20.07.1
+    #> Launching `script08.nf` [hopeful_magritte] - revision: fee10780ef
+    #> params.input = something.txt
+    #> params.output = ./results
+
+    nextflow run script08.nf --input "something.txt" --outdir "here"
+    #> N E X T F L O W  ~  version 20.07.1
+    #> Launching `script08.nf` [peaceful_minsky] - revision: fee10780ef
+    #> params.input = something.txt
+    #> params.output = here
+
+</details>
+<details>
+<summary>
+SLURM - <b>in progress</b>
+</summary>
+
+You can place general params and directives in the `nextflow.config`
+file.
+
+    /***************************************
+     Name: Nextflow Config File
+     Auth: Jennifer Chang
+     Auth: Andrew Severin
+     Desc: Nextflow Configuration File must be in same folder as nf script (or in .nextflow)
+     Docs: https://hpc.nih.gov/apps/nextflow.html
+           https://www.nextflow.io/docs/latest/config.html
+
+     ***************************************/
+
+    /*****************************
+     Define default param values 
+     (overwrite it via --outdir diff_directory)
+     *****************************/
+    params {
+      outdir = './results'
+    //  input = './data/*'
+    }
+
+
+    /*****************************
+     Define computing resource 
+     (local/slurm/aws)
+     *****************************/
+    process {
+      publishDir = "$params.outdir"
+      
+      /* comment and uncoment following for slurm */
+      executor = 'slurm'
+      clusterOptions = '-N 2 -t 01:00:00' //<= put all slurm settings here
+    }
+
+    /*****************************
+     Generate html runtime reports
+     Same as adding:
+      -with-timeline timeline.html
+      -with-report report.html
+     *****************************/
+    timeline {
+      enabled = true
+      file = "$params.outdir/timeline.html"
+    }
+
+    report {
+      enabled = true
+      file = "$params.outdir/report.html"
+    }
+
+Running a nextflow in the same folder will run via slurm
+
+    nextflow run script06.nf --outdir output_06
+    #> N E X T F L O W  ~  version 20.07.1
+    #> Launching `script06.nf` [desperate_colden] - revision: 0be74525f0
+    #> 
+    #> Pipeline = Amy -> Bob -> Cathy -> Dave -> Eve
+    #> where each person runs 5 seconds to pass the baton to next person
+    #>
+    #> DataflowVariable(value=null)
+    #> executor >  slurm (3)                    <=======================SLURM
+    #> [6e/5165fa] process > Amy   [100%] 1 of 1 ✔
+    #> [d6/b741d1] process > Bob   [100%] 1 of 1 ✔
+    #> [3a/583297] process > Cathy [  0%] 0 of 1
+    #> [-        ] process > Dave  -
+    #> [-        ] process > Eve   -
+
+Notice how there’s a `slurm(3)` line. From a different terminal, we can
+view queue, for me the `Bob` process is running as `nf-Bob`.
+
+    squeue | grep jenchang
+    #> 1076059 short_med   nf-Bob jenchang  R       0:00      2 condo[005-006] 
+    #> 1076026     debug       sh jenchang  R    1:29:26      1 condodebug001 
+
+And after the run we have the timeline information
+
+    ls -ltr output_06/
+    #> total 1390
+    #> -rw-r-----. 1 jenchang its-hpc-condo-severin 2929977 Aug  5 14:30 report.html
+    #> -rw-r-----. 1 jenchang its-hpc-condo-severin    6590 Aug  5 14:30 timeline.html
+
+Looking at timeline, there are longer wait times between jobs:
+
+<img src="imgs/timeline_slurm.png" />
 
 </details>
 
